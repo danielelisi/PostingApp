@@ -19,6 +19,7 @@ var dbURL = process.env.DATABASE_URL || "postgres://localhost:5432/postingapp";
 
 // Modules configurations
 app.use("/scripts", express.static("build"));
+app.use("/style", express.static("stylesheet"));
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(session({
     secret: "danielesimpleposting",
