@@ -30,8 +30,60 @@ app.use(session({
 
 // Routing
 app.get("/", function (req, resp) {
+    if (req.session.user) {
+        resp.sendFile(publicFolder + "/posts.html");
+    } else {
+        resp.sendFile(publicFolder + "index.html");
+    }
+});
 
-    resp.end("Welcome to Simple Posting App");
+app.get("/posts", function (req, resp) {
+    if (req.session.user) {
+        resp.sendFile(publicFolder + "/posts.html");
+    } else {
+        resp.sendFile(publicFolder + "index.html");
+    }
+});
+
+
+// Async requests for index.html
+app.post("/user/register", function (req, resp) {
+
+    pg.connect(dbURL, function(err, client, done) {
+        if (err) {
+            console.log(err);
+        }
+
+        client.query("INSERT INTO users (username, email, password) VALUES ($1,$2,$3)", [req.body.username, req.body.email, req.body.password], function (err) {
+            done();
+            if (err) {
+                console.log(err);
+                resp.send({status: "fail", msg: "Error in registration"});
+            }
+
+            resp.send({status: "success", msg: "User is registered"});
+        });
+    });
+});
+
+app.post("/user/login", function (req, resp) {
+
+    pg.connect(dbURL, function(err, client, done) {
+        if (err) {
+            console.log(err);
+        }
+
+        client.query("SELECT id, username FROM users WHERE email = $1 AND password = $2", [req.body.email, req.body.password], function(err, result){
+            done();
+            if (err) {
+                console.log(err);
+                resp.send({status: "fail"});
+            }
+
+            req.session.user = {username: result.rows[0].username, id: result.rows[0].id};
+            resp.send({status: "success"});
+        })
+    });
 });
 
 

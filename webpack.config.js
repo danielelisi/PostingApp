@@ -10,7 +10,8 @@ var buildFolder = path.resolve(__dirname, "build");
 
 var config = {
     entry: {
-        "welcome": jsFolder + "/welcome.js"
+        "welcome": jsFolder + "/welcome.js",
+        "posts": jsFolder + "/posts.js"
     },
     output: {
         filename: "[name]bundle.js",
