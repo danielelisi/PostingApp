@@ -33,7 +33,7 @@ app.get("/", function (req, resp) {
     if (req.session.user) {
         resp.sendFile(publicFolder + "/posts.html");
     } else {
-        resp.sendFile(publicFolder + "index.html");
+        resp.sendFile(publicFolder + "/index.html");
     }
 });
 
@@ -41,14 +41,13 @@ app.get("/posts", function (req, resp) {
     if (req.session.user) {
         resp.sendFile(publicFolder + "/posts.html");
     } else {
-        resp.sendFile(publicFolder + "index.html");
+        resp.sendFile(publicFolder + "/index.html");
     }
 });
 
 
-// Async requests for index.html
+// Async requests for index
 app.post("/user/register", function (req, resp) {
-
     pg.connect(dbURL, function(err, client, done) {
         if (err) {
             console.log(err);
@@ -67,7 +66,6 @@ app.post("/user/register", function (req, resp) {
 });
 
 app.post("/user/login", function (req, resp) {
-
     pg.connect(dbURL, function(err, client, done) {
         if (err) {
             console.log(err);
@@ -80,9 +78,70 @@ app.post("/user/login", function (req, resp) {
                 resp.send({status: "fail"});
             }
 
-            req.session.user = {username: result.rows[0].username, id: result.rows[0].id};
-            resp.send({status: "success"});
+            console.log(result.rows[0]);
+
+            if (result.rows[0] == undefined) {
+
+                resp.send({status: "fail", msg: "username/password match not valid"});
+            } else {
+
+                var userObj = {
+                    id: result.rows[0].id,
+                    username: result.rows[0].username
+                }
+
+                req.session.user = userObj;
+                resp.send({status: "success"});
+            }
         })
+    });
+});
+
+
+// Async requests for Posts
+app.post("/posts/create", function(req, resp) {
+    pg.connect(dbURL, function(err, client, done){
+        if(err) {
+            console.log(err);
+        }
+
+        client.query("INSERT INTO posts (user_id, title, description) VALUES ($1,$2,$3) RETURNING time_created", [req.session.user.id, req.body.title, req.body.desc], function(err, result) {
+            done();
+            if(err) {
+                console.log(err);
+            }
+
+            console.log(result.rows);
+
+            if (result.rows.length > 0) {
+                var postObj = {
+                    username: req.session.user.username,
+                    time: result.rows[0].time_created,
+                    msg: "Post Created!"
+                };
+
+                resp.send(postObj);
+            } else {
+                resp.send({msg: "Error, Try Again"});
+            }
+        });
+    });
+});
+
+app.get("/post/load", function(req, resp) {
+    pg.connect(dbURL, function(err, client, done) {
+        if(err) {
+            console.log(err);
+        }
+
+        client.query("SELECT * FROM posts", [], function(err, result) {
+            if(err) {
+                console.log(err);
+            }
+
+            console.log(result.rows);
+            done();
+        });
     });
 });
 

@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -10327,75 +10327,43 @@ return jQuery;
 
 
 /***/ }),
-/* 1 */,
-/* 2 */
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function($) {/**
- * Created by danielelisi on 2017-04-09.
+ * Created by danielelisi on 2017-04-15.
  */
+console.log("LINKED TO POSTS.HTML");
 
-console.log("Linked to INDEX.HTML");
-
-// Variables definitions
-var usernameInput = document.getElementById("usernameInput");
-var emailInput = document.getElementById("emailInput");
-var passwordInput = document.getElementById("passwordInput");
-
-var regButton = document.getElementById("registerButton");
-var loginButton = document.getElementById("loginButton");
+// Variables initialization
+var titleInput = document.getElementById("titleInput");
+var descInput = document.getElementById("descInput");
 var statusDiv = document.getElementById("status");
 
 
-document.getElementById("showRegButton").addEventListener("click", function () {
-    usernameInput.style.display = "inline";
-    emailInput.style.display = "inline";
-    passwordInput.style.display = "inline";
-    regButton.style.display = "inline";
-    loginButton.style.display = "none";
-});
+// $.ajax({
+//     type: "POST",
+//     url: "/posts/load",
+//     success: function(response) {
+//         console.log(response);
+//     }
+// });
 
-document.getElementById("showLoginButton").addEventListener("click", function () {
-    usernameInput.style.display = "none";
-    emailInput.style.display = "inline";
-    passwordInput.style.display = "inline";
-    loginButton.style.display = "inline";
-    regButton.style.display = "none";
-});
-
-
-regButton.addEventListener("click", function() {
+document.getElementById("createButton").addEventListener("click", function () {
     $.ajax({
         type: "POST",
-        url: "/user/register",
+        url: "/posts/create",
         data: {
-            username: usernameInput.value,
-            email: emailInput.value,
-            password: passwordInput.value
+            title: titleInput.value,
+            desc: descInput.value
         },
         success: function(response) {
             statusDiv.innerHTML = response.msg;
+
+
         }
     });
 });
-
-loginButton.addEventListener("click", function() {
-    $.ajax({
-        type: "POST",
-        url: "/user/login",
-        data: {
-            email: emailInput.value,
-            password: passwordInput.value
-        },
-        success: function(response) {
-            if (response.status == "success") {
-                location.href = "/posts"
-            } else {
-                statusDiv.innerHTML = response.msg;
-            }
-        }
-    });
-})
 
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))

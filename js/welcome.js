@@ -11,6 +11,7 @@ var passwordInput = document.getElementById("passwordInput");
 
 var regButton = document.getElementById("registerButton");
 var loginButton = document.getElementById("loginButton");
+var statusDiv = document.getElementById("status");
 
 
 document.getElementById("showRegButton").addEventListener("click", function () {
@@ -40,11 +41,7 @@ regButton.addEventListener("click", function() {
             password: passwordInput.value
         },
         success: function(response) {
-            if (response.status == "success") {
-                document.getElementById("status").innerHTML = response.msg;
-            } else {
-                document.getElementById("status").innerHTML = response.msg;
-            }
+            statusDiv.innerHTML = response.msg;
         }
     });
 });
@@ -60,6 +57,8 @@ loginButton.addEventListener("click", function() {
         success: function(response) {
             if (response.status == "success") {
                 location.href = "/posts"
+            } else {
+                statusDiv.innerHTML = response.msg;
             }
         }
     });
