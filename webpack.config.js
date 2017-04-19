@@ -11,7 +11,8 @@ var buildFolder = path.resolve(__dirname, "build");
 var config = {
     entry: {
         "welcome": jsFolder + "/welcome.js",
-        "posts": jsFolder + "/posts.js"
+        "postsList": jsFolder + "/postsList.js",
+        "post": jsFolder + "/post.js"
     },
     output: {
         filename: "[name]bundle.js",

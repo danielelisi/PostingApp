@@ -6,9 +6,9 @@
 /******/ 	function __webpack_require__(moduleId) {
 /******/
 /******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
+/******/ 		if(installedModules[moduleId]) {
 /******/ 			return installedModules[moduleId].exports;
-/******/
+/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			i: moduleId,
@@ -10333,6 +10333,7 @@ return jQuery;
 /* WEBPACK VAR INJECTION */(function($) {/**
  * Created by danielelisi on 2017-04-15.
  */
+
 console.log("LINKED TO POSTS.HTML");
 
 // Variables initialization
@@ -10340,27 +10341,62 @@ var titleInput = document.getElementById("titleInput");
 var descInput = document.getElementById("descInput");
 var statusDiv = document.getElementById("status");
 
+var listPostDiv = document.getElementById("listPosts");
 
-// $.ajax({
-//     type: "POST",
-//     url: "/posts/load",
-//     success: function(response) {
-//         console.log(response);
-//     }
-// });
+
+$.ajax({
+    type: "POST",
+    url: "/postCRUD",
+    data: {
+        status: "read"
+    },
+    success: function (response) {
+
+        for (var i =0; i < response.length; i++) {
+            var newDiv = document.createElement("div");
+            var newInfo = document.createElement("h6");
+            var newTitle = document.createElement("h2");
+            var newDesc = document.createElement("h4");
+
+            newDiv.className = "postDiv";
+            newInfo.innerHTML = "User: " + response[i].username + " created this post on: " + response[i].timezone;
+            newTitle.innerHTML = response[i].title;
+            newDesc.innerHTML = response[i].description;
+
+            listPostDiv.appendChild(newDiv);
+            newDiv.appendChild(newInfo);
+            newDiv.appendChild(newTitle);
+            newDiv.appendChild(newDesc);
+        }
+    }
+});
 
 document.getElementById("createButton").addEventListener("click", function () {
     $.ajax({
         type: "POST",
-        url: "/posts/create",
+        url: "/postCRUD",
         data: {
+            status: "create",
             title: titleInput.value,
             desc: descInput.value
         },
         success: function(response) {
             statusDiv.innerHTML = response.msg;
 
+            var newDiv = document.createElement("div");
+            var newInfo = document.createElement("h6");
+            var newTitle = document.createElement("h2");
+            var newDesc = document.createElement("h4");
 
+            newDiv.className = "postDiv";
+            newInfo.innerHTML = "User: " + response.username + " created this post on: " + response.time;
+            newTitle.innerHTML = titleInput.value;
+            newDesc.innerHTML = descInput.value;
+
+            listPostDiv.appendChild(newDiv);
+            newDiv.appendChild(newInfo);
+            newDiv.appendChild(newTitle);
+            newDiv.appendChild(newDesc);
         }
     });
 });
