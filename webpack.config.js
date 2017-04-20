@@ -12,7 +12,8 @@ var config = {
     entry: {
         "welcome": jsFolder + "/welcome.js",
         "postsList": jsFolder + "/postsList.js",
-        "post": jsFolder + "/post.js"
+        "post": jsFolder + "/post.js",
+        "chat": jsFolder + "/chatroom.js"
     },
     output: {
         filename: "[name]bundle.js",

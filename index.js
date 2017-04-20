@@ -49,17 +49,27 @@ app.get("/posts/:postindex", function (req, resp) {
 
     if (req.session.user) {
 
-        var username = req.session.user.username;
-        var postNum = req.params.postindex;
-
-        console.log("User: "+ username +" entered forum post n." + postNum);
-
-        req.session.user.postId = postNum;
+        req.session.user.postId = req.params.postindex;
         resp.sendFile(publicFolder + "/post.html");
 
     } else {
         resp.sendFile(publicFolder + "/index.html");
     }
+});
+
+app.get("/chatroom/:chatindex", function (req, resp) {
+
+    var username
+
+    if (req.session.user) {
+
+        req.session.user.postId = req.params.chatindex;
+        resp.sendFile(publicFolder + "/chatroom.html");
+
+    } else {
+        resp.sendFile(publicFolder + "/index.html")
+    }
+
 });
 
 // Logout
