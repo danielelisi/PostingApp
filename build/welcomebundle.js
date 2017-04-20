@@ -10396,7 +10396,7 @@ loginButton.addEventListener("click", function() {
             }
         }
     });
-});
+})
 
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))

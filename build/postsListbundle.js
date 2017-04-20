@@ -10344,6 +10344,18 @@ var statusDiv = document.getElementById("status");
 
 var listPostDiv = document.getElementById("listPosts");
 
+document.getElementById("logoutButton").addEventListener("click", function () {
+    $.ajax({
+        url: "/logout",
+        type: "POST",
+        success: function(response) {
+            if(response === "success") {
+                location.reload();
+            }
+        }
+    });
+});
+
 
 $.ajax({
     type: "POST",
@@ -10353,27 +10365,32 @@ $.ajax({
     },
     success: function (response) {
 
-        for (var i =0; i < response.length; i++) {
+        for (var i = 0; i < response.length; i++) {
             var newDiv = document.createElement("div");
-            var newInfo = document.createElement("h6");
+            var newInfo = document.createElement("h5");
             var newTitle = document.createElement("h2");
             var newDesc = document.createElement("h4");
+            var enterChat = document.createElement("button");
+            var enterPost = document.createElement("button");
+
 
             newDiv.className = "postDiv";
-            newInfo.innerHTML = "User: " + response[i].username + " created this post on: " + response[i].timezone;
+            newInfo.innerHTML = "User: " + response[i].username + " created this post on: " + response[i].time_created;
             newTitle.innerHTML = response[i].title;
             newDesc.innerHTML = response[i].description;
+
+            // assign post db id to the div
+            enterPost.postId = response[i].id;
+            enterPost.innerHTML = "Enter Post Replies";
+            enterPost.addEventListener("click", function () {
+                location.href = "/posts/" + this.postId;
+            });
 
             listPostDiv.appendChild(newDiv);
             newDiv.appendChild(newInfo);
             newDiv.appendChild(newTitle);
             newDiv.appendChild(newDesc);
-
-            // assign post db id to the div
-            newDiv.postId = response[i].id;
-            newDiv.addEventListener("click", function () {
-                location.href = "/posts/" + this.postId;
-            });
+            newDiv.appendChild(enterPost);
         }
     }
 });
@@ -10394,21 +10411,30 @@ document.getElementById("createButton").addEventListener("click", function () {
             var newInfo = document.createElement("h6");
             var newTitle = document.createElement("h2");
             var newDesc = document.createElement("h4");
+            var enterChat = document.createElement("button");
+            var enterPost = document.createElement("button");
+
 
             newDiv.className = "postDiv";
             newInfo.innerHTML = "User: " + response.username + " created this post on: " + response.time;
             newTitle.innerHTML = titleInput.value;
             newDesc.innerHTML = descInput.value;
 
-            listPostDiv.appendChild(newDiv);
+            enterPost.postId = response.postId;
+            enterPost.innerHTML = "Enter Post Replies";
+            enterPost.addEventListener("click", function () {
+                location.href = "/posts/" + this.postId;
+            });
+
+            listPostDiv.insertBefore(newDiv, listPostDiv.childNodes[0]);
             newDiv.appendChild(newInfo);
             newDiv.appendChild(newTitle);
             newDiv.appendChild(newDesc);
+            newDiv.appendChild(enterPost);
 
-            newDiv.postId = response.id;
-            newDiv.addEventListener("click", function () {
-                location.href = "/posts/" + this.postId;
-            });
+
+            titleInput.value = "";
+            descInput.value = "";
         }
     });
 });

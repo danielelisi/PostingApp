@@ -45,6 +45,29 @@ app.get("/posts", function (req, resp) {
     }
 });
 
+app.get("/posts/:postindex", function (req, resp) {
+
+    if (req.session.user) {
+
+        var username = req.session.user.username;
+        var postNum = req.params.postindex;
+
+        console.log("User: "+ username +" entered forum post n." + postNum);
+
+        req.session.user.postId = postNum;
+        resp.sendFile(publicFolder + "/post.html");
+
+    } else {
+        resp.sendFile(publicFolder + "/index.html");
+    }
+});
+
+// Logout
+app.post("/logout", function(req,resp) {
+    req.session.destroy();
+    resp.send("success");
+});
+
 
 // Async requests for index
 app.post("/user/register", function (req, resp) {
@@ -53,7 +76,12 @@ app.post("/user/register", function (req, resp) {
             console.log(err);
         }
 
-        client.query("INSERT INTO users (username, email, password) VALUES ($1,$2,$3)", [req.body.username, req.body.email, req.body.password], function (err) {
+        var username = req.body.username;
+        var email = req.body.email;
+        var password = req.body.password;
+
+        var dbQuery = "INSERT INTO users (username, email, password) VALUES ($1,$2,$3)";
+        client.query(dbQuery, [username, email, password], function (err) {
             done();
             if (err) {
                 console.log(err);
@@ -71,18 +99,20 @@ app.post("/user/login", function (req, resp) {
             console.log(err);
         }
 
-        client.query("SELECT id, username FROM users WHERE email = $1 AND password = $2", [req.body.email, req.body.password], function (err, result) {
+        var email = req.body.email;
+        var password = req.body.password;
+
+        var dbQuery = "SELECT id, username FROM users WHERE email = $1 AND password = $2";
+        client.query(dbQuery, [email, password], function (err, result) {
             done();
             if (err) {
                 console.log(err);
-                resp.send({status: "fail"});
             }
-
-            console.log(result.rows[0]);
 
             if (result.rows[0] === undefined) {
 
                 resp.send({status: "fail", msg: "username/password match not valid"});
+
             } else {
 
                 req.session.user = {
@@ -96,7 +126,7 @@ app.post("/user/login", function (req, resp) {
 });
 
 
-// Async requests for Posts CRUD
+// Async Posts CRUD
 app.post("/postCRUD", function (req, resp) {
 
     if (req.body.status === "create") {
@@ -105,21 +135,24 @@ app.post("/postCRUD", function (req, resp) {
                 console.log(err);
             }
 
-            client.query("INSERT INTO posts (user_id, title, description) VALUES ($1,$2,$3) RETURNING time_created AT TIME ZONE 'PST', id", [req.session.user.id, req.body.title, req.body.desc], function (err, result) {
+            var dbQuery = "INSERT INTO posts (user_id, title, description) " +
+                "VALUES ($1,$2,$3) " +
+                "RETURNING time_created, id";
+            client.query(dbQuery, [req.session.user.id, req.body.title, req.body.desc], function (err, result) {
                 done();
                 if (err) {
                     console.log(err);
                 }
 
                 if (result.rows.length > 0) {
-
                     var postObj = {
                         username: req.session.user.username,
-                        time: result.rows[0].timezone,
+                        time: result.rows[0].time_created,
                         postId: result.rows[0].id,
                         msg: "Post Created!"
                     };
                     resp.send(postObj);
+
                 } else {
                     resp.send({msg: "Error, Try Again"});
                 }
@@ -134,7 +167,11 @@ app.post("/postCRUD", function (req, resp) {
             }
 
             // retrieve id to be assign to newDiv client side
-            client.query("SELECT posts.id, title, description, users.username, time_created AT TIME ZONE 'PST' FROM posts INNER JOIN users ON posts.user_id = users.id", [], function (err, result) {
+            var dbQuery = "SELECT posts.id, title, description, users.username, time_created " +
+                "FROM posts " +
+                "INNER JOIN users ON posts.user_id = users.id " +
+                "ORDER BY posts.id DESC";
+            client.query(dbQuery, [], function (err, result) {
                 done();
                 if (err) {
                     console.log(err);
@@ -143,25 +180,10 @@ app.post("/postCRUD", function (req, resp) {
                 resp.send(result.rows);
             });
         });
-    } else {
-        console.log("error");
     }
 });
 
-
-app.get("/posts/:postindex", function (req, resp) {
-
-    if (req.session.user) {
-
-        req.session.user.postId = req.params.postindex;
-        resp.sendFile(publicFolder + "/post.html");
-
-    } else {
-        resp.sendFile(publicFolder + "/index.html");
-    }
-});
-
-
+// Async Replies CRUD
 app.post("/repliesCRUD", function(req, resp) {
 
     if (req.body.status === "create") {
@@ -184,20 +206,22 @@ app.post("/repliesCRUD", function(req, resp) {
 
             });
         });
-    } else if (req.body.status === "read") {
+    }
+    else if (req.body.status === "read") {
 
         pg.connect(dbURL, function (err, client, done) {
             if(err){
                 console.log(err);
             }
 
-            client.query("SELECT * FROM replies WHERE post_id = $1", [req.session.user.postId], function(err, result) {
+            var dbQuery = "SELECT * FROM replies WHERE post_id = $1";
+            client.query(dbQuery, [req.session.user.postId], function(err, result) {
                 done();
                 if(err){
                     console.log(err);
                 }
 
-                if(result.rows.length > 0){
+                if (result.rows.length > 0){
 
                     resp.send({status: "success", replies: result.rows});
 
@@ -206,6 +230,12 @@ app.post("/repliesCRUD", function(req, resp) {
                 }
             });
         });
+    }
+    else if (req.body.status === "update") {
+
+    }
+    else if (req.body.status === "delete") {
+
     }
 });
 

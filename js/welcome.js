@@ -62,5 +62,5 @@ loginButton.addEventListener("click", function() {
             }
         }
     });
-});
+})
 
