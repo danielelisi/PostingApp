@@ -10370,7 +10370,7 @@ $.ajax({
             var newInfo = document.createElement("h5");
             var newTitle = document.createElement("h2");
             var newDesc = document.createElement("h4");
-            var enterChat = document.createElement("button");
+            var chatButton = document.createElement("button");
             var enterPost = document.createElement("button");
 
 
@@ -10386,11 +10386,19 @@ $.ajax({
                 location.href = "/posts/" + this.postId;
             });
 
+            // Live Chatroom
+            chatButton.chatId = response[i].id;
+            chatButton.innerHTML = "Enter Post Livechat";
+            chatButton.addEventListener("click", function() {
+                location.href = "/chatroom/" + this.chatId;
+            });
+
             listPostDiv.appendChild(newDiv);
             newDiv.appendChild(newInfo);
             newDiv.appendChild(newTitle);
             newDiv.appendChild(newDesc);
             newDiv.appendChild(enterPost);
+            newDiv.appendChild(chatButton);
         }
     }
 });
@@ -10408,10 +10416,10 @@ document.getElementById("createButton").addEventListener("click", function () {
             statusDiv.innerHTML = response.msg;
 
             var newDiv = document.createElement("div");
-            var newInfo = document.createElement("h6");
+            var newInfo = document.createElement("h5");
             var newTitle = document.createElement("h2");
             var newDesc = document.createElement("h4");
-            var enterChat = document.createElement("button");
+            var chatButton = document.createElement("button");
             var enterPost = document.createElement("button");
 
 
@@ -10426,12 +10434,20 @@ document.getElementById("createButton").addEventListener("click", function () {
                 location.href = "/posts/" + this.postId;
             });
 
+            // Livechat button
+            chatButton.chatId = response.postId;
+            chatButton.innerHTML = "Enter Post Livechat";
+            chatButton.addEventListener("click", function () {
+                location.href = "/chatroom/" + this.chatId;
+            });
+
+
             listPostDiv.insertBefore(newDiv, listPostDiv.childNodes[0]);
             newDiv.appendChild(newInfo);
             newDiv.appendChild(newTitle);
             newDiv.appendChild(newDesc);
             newDiv.appendChild(enterPost);
-
+            newDiv.appendChild(chatButton);
 
             titleInput.value = "";
             descInput.value = "";
