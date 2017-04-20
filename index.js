@@ -12,6 +12,7 @@ const pg = require("pg");
 var app = express();
 const server = require("http").createServer(app);
 var io = require("socket.io")(server);
+var userChatList = {}; // Dictionary keep track of number users in each chatroom
 
 // Path resolver
 var publicFolder = path.resolve(__dirname, "view");
@@ -169,7 +170,8 @@ app.post("/postCRUD", function (req, resp) {
             });
         });
 
-    } else if (req.body.status === "read") {
+    }
+    else if (req.body.status === "read") {
 
         pg.connect(dbURL, function (err, client, done) {
             if (err) {
@@ -203,7 +205,8 @@ app.post("/repliesCRUD", function(req, resp) {
                 console.log(err);
             }
 
-            client.query("INSERT INTO replies (post_id, reply) VALUES ($1, $2) RETURNING time_created", [req.session.user.postId, req.session.user.username + ": > " + req.body.reply], function (err, result){
+            var dbQuery = "INSERT INTO replies (post_id, reply) VALUES ($1, $2) RETURNING time_created";
+            client.query(dbQuery, [req.session.user.postId, req.session.user.username + ": > " + req.body.reply], function (err, result){
                done();
                if(err){
                    console.log(err);
@@ -247,6 +250,55 @@ app.post("/repliesCRUD", function(req, resp) {
     else if (req.body.status === "delete") {
 
     }
+});
+
+
+// Async Chatroom
+app.post("/chatroom/info", function(req, resp) {
+
+    pg.connect(dbURL, function(err, client, done) {
+        if (err) {
+            console.log(err);
+        }
+
+        var dbQuery = "SELECT * FROM posts WHERE id = $1";
+        client.query(dbQuery, [req.session.user.postId], function (err, result) {
+            if (err) {
+                console.log(err);
+            }
+
+            result.rows[0].username = req.session.user.username;
+
+            resp.send(result.rows[0]);
+        });
+    });
+});
+
+
+// Socket.io for Livechat
+io.on("connection", function(socket) {
+
+    // On page load user join socket channel by chatID
+    socket.on("join chat", function(chatID) {
+        console.log("user join chat");
+        socket.chatID = "chatroom" + chatID;
+        socket.join(socket.chatID);
+
+        if (userChatList[socket.chatID] === undefined) {
+            userChatList[socket.chatID] = 0;
+        } else {
+            userChatList[socket.chatID]++;
+        }
+    });
+
+    socket.on("send message", function(messageObj){
+
+        io.to(socket.chatID).emit("create message", messageObj);
+    });
+
+    socket.on("disconnect", function() {
+        userChatList[socket.chatID]--;
+    });
 });
 
 
