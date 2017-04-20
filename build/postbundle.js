@@ -10378,6 +10378,7 @@ sendButton.addEventListener("click", function () {
                 repliesDiv.appendChild(newReply);
 
                 statusDiv.innerHTML = "";
+                replyInput.value = "";
             } else {
                 statusDiv.innerHTML = "Error occurred";
             }

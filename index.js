@@ -85,10 +85,13 @@ app.post("/user/login", function (req, resp) {
                 resp.send({status: "fail", msg: "username/password match not valid"});
             } else {
 
-                req.session.user = {
+                var userObj = {
                     id: result.rows[0].id,
                     username: result.rows[0].username
                 };
+
+                req.session.user = userObj;
+
                 resp.send({status: "success"});
             }
         })
@@ -134,7 +137,7 @@ app.post("/postCRUD", function (req, resp) {
             }
 
             // retrieve id to be assign to newDiv client side
-            client.query("SELECT posts.id, title, description, users.username, time_created AT TIME ZONE 'PST' FROM posts INNER JOIN users ON posts.user_id = users.id", [], function (err, result) {
+            client.query("SELECT posts.id, title, description, users.username, time_created AT TIME ZONE 'PST' FROM posts INNER JOIN users ON posts.user_id = users.id ORDER BY posts.id DESC", [], function (err, result) {
                 done();
                 if (err) {
                     console.log(err);
@@ -148,7 +151,13 @@ app.post("/postCRUD", function (req, resp) {
     }
 });
 
+app.post("/logout", function(req,resp) {
+    req.session.destroy();
+    resp.send("success");
+});
 
+
+// POST Section
 app.get("/posts/:postindex", function (req, resp) {
 
     if (req.session.user) {

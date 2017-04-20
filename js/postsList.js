@@ -11,6 +11,18 @@ var statusDiv = document.getElementById("status");
 
 var listPostDiv = document.getElementById("listPosts");
 
+document.getElementById("logoutButton").addEventListener("click", function () {
+    $.ajax({
+        url: "/logout",
+        type: "POST",
+        success: function(response) {
+            if(response === "success") {
+                location.reload();
+            }
+        }
+    });
+});
+
 
 $.ajax({
     type: "POST",
@@ -67,15 +79,18 @@ document.getElementById("createButton").addEventListener("click", function () {
             newTitle.innerHTML = titleInput.value;
             newDesc.innerHTML = descInput.value;
 
-            listPostDiv.appendChild(newDiv);
+            listPostDiv.insertBefore(newDiv, listPostDiv.childNodes[0]);
             newDiv.appendChild(newInfo);
             newDiv.appendChild(newTitle);
             newDiv.appendChild(newDesc);
 
-            newDiv.postId = response.id;
+            newDiv.postId = response.postId;
             newDiv.addEventListener("click", function () {
                 location.href = "/posts/" + this.postId;
             });
+
+            titleInput.value = "";
+            descInput.value = "";
         }
     });
 });
